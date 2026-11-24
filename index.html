@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>안서동 안심귀가 QR</title>
+  <style>
+    : * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #edf4ff;
+      color: #17233a;
+    }
+    .container {
+      width: min(92%, 460px);
+      margin: 24px auto;
+    }
+    .card {
+      background: white;
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 8px 24px rgba(36, 74, 140, .12);
+    }
+    h1 {
+      font-size: 22px;
+      margin: 0 0 8px;
+    }
+    .subtitle {
+      color: #61708a;
+      margin: 0 0 18px;
+      line-height: 1.5;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+      margin: 14px 0 7px;
+    }
+    input, select, button {
+      width: 100%;
+      min-height: 48px;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+    input, select {
+      border: 1px solid #ccd6e8;
+      padding: 10px 12px;
+      background: white;
+    }
+    button {
+      border: 0;
+      margin-top: 16px;
+      color: white;
+      background: #2764cf;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button.danger {
+      background: #dc3545;
+    }
+    .status {
+      margin-top: 16px;
+      padding: 13px;
+      border-radius: 10px;
+      background: #eef7ef;
+      color: #24642b;
+      line-height: 1.5;
+    }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="card">
+      <h1>안서동 대학가 안심귀가</h1>
+      <p class="subtitle">귀가 전 안전 상태를 확인하고 긴급 연락처를 준비하세요.</p>
+
+      <label for="location">출발 위치</label>
+      <select id="location">
+        <option value="백석대학교 정문">백석대학교 정문</option>
+        <option value="백석대학교 후문">백석대학교 후문</option>
+        <option value="안서동 대학가 상점가">안서동 대학가 상점가</option>
+        <option value="안서동 버스정류장">안서동 버스정류장</option>
+      </select>
+
+      <label for="destination">목적지</label>
+      <input id="destination" placeholder="예: 천안역, 자택">
+
+      <label for="phone">긴급 연락처</label>
+      <input id="phone" inputmode="tel" placeholder="예: 010-1234-5678">
+
+      <button id="startButton" type="button">안심귀가 시작</button>
+      <button id="mapButton" type="button" class="hidden">카카오맵에서 길찾기</button>
+      <button id="emergencyButton" type="button" class="danger hidden">긴급 신고 112 연결</button>
+
+      <div id="status" class="status hidden"></div>
+    </section>
+  </main>
+
+  <script>
+    const locationInput = document.getElementById("location");
+    const destinationInput = document.getElementById("destination");
+    const phoneInput = document.getElementById("phone");
+    const startButton = document.getElementById("startButton");
+    const mapButton = document.getElementById("mapButton");
+    const emergencyButton = document.getElementById("emergencyButton");
+    const status = document.getElementById("status");
+
+    startButton.addEventListener("click", () => {
+      const destination = destinationInput.value.trim();
+      const phone = phoneInput.value.trim();
+
+      if (!destination) {
+        alert("목적지를 입력해주세요.");
+        return;
+      }
+
+      if (!phone) {
+        alert("긴급 연락처를 입력해주세요.");
+        return;
+      }
+
+      status.classList.remove("hidden");
+      status.textContent =
+        "안심귀가가 시작되었습니다.\n출발지: " +
+        locationInput.value +
+        "\n목적지: " +
+        destination +
+        "\n긴급 연락처: " +
+        phone;
+
+      mapButton.classList.remove("hidden");
+      emergencyButton.classList.remove("hidden");
+
+      localStorage.setItem("safeReturnInfo", JSON.stringify({
+        from: locationInput.value,
+        to: destination,
+        phone: phone
+      }));
+    });
+
+    mapButton.addEventListener("click", () => {
+      const from = encodeURIComponent(locationInput.value);
+      const to = encodeURIComponent(destinationInput.value);
+      window.open(
+        `https://map.kakao.com/link/to/${to}/${from}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    });
+
+    emergencyButton.addEventListener("click", () => {
+      window.location.href = "tel:112";
+    });
+
+    const saved = JSON.parse(localStorage.getItem("safeReturnInfo") || "null");
+    if (saved) {
+      locationInput.value = saved.from;
+      destinationInput.value = saved.to;
+      phoneInput.value = saved.phone;
+    }
+  </script>
+</body>
+</html>
